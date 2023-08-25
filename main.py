@@ -22,7 +22,7 @@ bgImg = pygame.image.load('./img/fundo.PNG').convert_alpha()
 bg = pygame.transform.scale(bgImg, (x,y))
 
 # pegar valor relativo de X pra poder fazer o fundo se mover
-xRel = x % bg.get_rect().width
+
 
 # pegar uma imagem e deixar ela menor pra ser usada como personagem
 pImg = pygame.image.load('./img/player.png').convert_alpha()
@@ -63,7 +63,7 @@ while running:
 
     # pygame.display.flip()
 
-    
+    xRel = x % bg.get_rect().width
     screen.blit(bg, (xRel - bg.get_rect().width, 0))
     
     if xRel < 1280:

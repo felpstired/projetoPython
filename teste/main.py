@@ -29,7 +29,9 @@ sqr = 45
 sqrMiddle = middleX - (sqr / 2)
 
 velX = middleX - (sqr / 2)
-velY = 0
+velY = y - sqr
+
+jump = sqr * 3
 
 
 font = pygame.font.SysFont('lucidasans', 20)
@@ -64,6 +66,7 @@ while running:
     keys = pygame.key.get_pressed()
     
     if keys[pygame.K_UP] and velY > 0:
+        
         velY -= 0.5
         
     if keys[pygame.K_DOWN] and velY < y - sqr:
@@ -75,7 +78,11 @@ while running:
     if keys[pygame.K_RIGHT] and velX < x - sqr:
         velX += 0.5
         
-    
+        
+    # velY -= 2
+
+    #     if velY == jump:
+    #         velY += 2
         
     
     # if velY > y - sqr:

@@ -20,7 +20,9 @@ pygame.display.set_caption("Freddy Fazbear's Pizzeria - ATARI")
 iconJanela = pygame.image.load('./img/icon.png')
 pygame.display.set_icon(iconJanela)
 
-font = pygame.font.SysFont('impact', 30)
+# font = pygame.font.SysFont('impact', 30)
+font = pygame.font.Font('./fonts/minecrafter.reg.TTF', 30)
+
 
 # pegar uma imagem e deixar ela do tamanho da janela
 bgImg = pygame.image.load('./img/fundo.PNG').convert_alpha()
@@ -65,8 +67,8 @@ positionEX = (x - 100) - (eX / 2)
 
 # quadrados das colisões
 colPlayer = p.get_rect()
-colProp = p.get_rect()
-colEnemy = p.get_rect()
+colProp = prop.get_rect()
+colEnemy = enemy.get_rect()
 
 # s = pygame.Surface((1000,750))  # the size of your rect
 # s.set_alpha(128)                # alpha level
@@ -74,7 +76,7 @@ colEnemy = p.get_rect()
 # # screen.blit(s, (0,0)) 
 
 # define a velocidade do player
-vel = 10
+vel = 5
 
 triggerProp = False
 
@@ -87,7 +89,7 @@ pontos = 10
 def collisions():
     global pontos
     
-    if colPlayer.colliderect(colEnemy) or colEnemy.x < 0:
+    if colPlayer.colliderect(colEnemy) or colEnemy.x <= 10:
         pontos -= 1
         return True
     elif colProp.colliderect(colEnemy):
@@ -145,7 +147,7 @@ while running:
             positionPY -= vel
 
             if not triggerProp:
-                posPropY -= 10
+                posPropY -= 5
         
         # se a tecla de setinha pra cima for pressionada
         if keys[pygame.K_DOWN] and positionPY<y - pY:
@@ -154,7 +156,7 @@ while running:
             positionPY += vel    
 
             if not triggerProp:
-                posPropY += 10
+                posPropY += 5
 
         # se a tecla de setinha pra cima for pressionada
         if keys[pygame.K_RIGHT] and positionPX < 100:
@@ -193,9 +195,12 @@ while running:
             posPropY = respawnProp()[1]
             triggerProp = respawnProp()[2]
             velProp = respawnProp()[3]
+
+        # if pontos == 0:
+        #     running = False
         
-        x -= 2
-        positionEX -= 7
+        x -= 1
+        positionEX -= 2
         posPropX += velProp
         
         colPlayer.x = positionPX
@@ -211,7 +216,9 @@ while running:
         screen.blit(score, (50, 50))
         
         # print(pontos)
-        # pygame.draw.rect(screen, (posPropX, posPropY))
+        pygame.draw.rect(screen, (255, 0, 0), colPlayer, 3)
+        pygame.draw.rect(screen, (255, 0, 0), colProp, 3)
+        pygame.draw.rect(screen, (255, 0, 0), colEnemy, 3)
         
 
         screen.blit(prop, (posPropX, posPropY))

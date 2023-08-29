@@ -20,6 +20,7 @@ pygame.display.set_caption("Freddy Fazbear's Pizzeria - ATARI")
 iconJanela = pygame.image.load('./img/icon.png')
 pygame.display.set_icon(iconJanela)
 
+font = pygame.font.SysFont('impact', 30)
 
 # pegar uma imagem e deixar ela do tamanho da janela
 bgImg = pygame.image.load('./img/fundo.PNG').convert_alpha()
@@ -62,6 +63,16 @@ positionEY = (y / 2) - (eY / 2)
 positionEX = (x - 100) - (eX / 2)
 
 
+# quadrados das colisões
+colPlayer = p.get_rect()
+colProp = p.get_rect()
+colEnemy = p.get_rect()
+
+# s = pygame.Surface((1000,750))  # the size of your rect
+# s.set_alpha(128)                # alpha level
+# s.fill((255,255,255))           # this fills the entire surface
+# # screen.blit(s, (0,0)) 
+
 # define a velocidade do player
 vel = 10
 
@@ -69,8 +80,21 @@ triggerProp = False
 
 running = True
 
+pontos = 10
 
 # funcoes
+
+def collisions():
+    global pontos
+    
+    if colPlayer.colliderect(colEnemy) or colEnemy.x < 0:
+        pontos -= 1
+        return True
+    elif colProp.colliderect(colEnemy):
+        pontos += 1
+        return True
+    else:
+        return False
 
 def respawn():
     x = 1300
@@ -88,7 +112,7 @@ def respawnProp():
 # enquanto o jogo estiver aberto, roda o código abaixo
 
 while running:
-    pygame.time.delay(10)
+    # pygame.time.delay(10)
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -160,11 +184,11 @@ while running:
             velProp = 10
 
         
-        if positionEX <= 10:
+        if positionEX <= 10 or collisions():
             positionEX = respawn()[0]
             positionEY = respawn()[1]
         
-        if posPropX > 1280:
+        if posPropX > 1280 or collisions():
             posPropX = respawnProp()[0]
             posPropY = respawnProp()[1]
             triggerProp = respawnProp()[2]
@@ -173,6 +197,22 @@ while running:
         x -= 2
         positionEX -= 7
         posPropX += velProp
+        
+        colPlayer.x = positionPX
+        colPlayer.y = positionPY
+        
+        colProp.x = posPropX
+        colProp.y = posPropY
+        
+        colEnemy.x = positionEX
+        colEnemy.y = positionEY
+        
+        score = font.render(f' SCORE: {int(pontos)}', True, ('white'))
+        screen.blit(score, (50, 50))
+        
+        # print(pontos)
+        # pygame.draw.rect(screen, (posPropX, posPropY))
+        
 
         screen.blit(prop, (posPropX, posPropY))
         screen.blit(p, (positionPX,positionPY))        

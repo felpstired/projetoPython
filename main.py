@@ -22,7 +22,7 @@ pygame.display.set_icon(iconJanela)
 
 # font = pygame.font.SysFont('impact', 30)
 font = pygame.font.Font('./fonts/minecrafter.reg.TTF', 30)
-
+fontGO = pygame.font.Font('./fonts/minecrafter.reg.TTF', 80)
 
 # pegar uma imagem e deixar ela do tamanho da janela
 bgImg = pygame.image.load('./img/fundo.PNG').convert_alpha()
@@ -35,11 +35,15 @@ p = pygame.transform.flip(p, True, False)
 
 # 
 propImg = pygame.image.load('./img/projetil.PNG').convert_alpha()
-prop = pygame.transform.scale(propImg, (50, 50))
+prop = pygame.transform.scale(propImg, (65, 65))
 
 # 
 enemyImg = pygame.image.load('./img/inimigo.PNG').convert_alpha()
 enemy = pygame.transform.scale(enemyImg, (100, 100))
+
+# 
+lifeImg = pygame.image.load('./img/life.PNG').convert_alpha()
+lifeImg = pygame.transform.scale(lifeImg, (32, 32))
 
 
 # faz o programa esperar um tempo antes de ser executado
@@ -76,7 +80,7 @@ colEnemy = enemy.get_rect()
 # # screen.blit(s, (0,0)) 
 
 # define a velocidade do player
-vel = 5
+vel = 1
 
 triggerProp = False
 
@@ -84,17 +88,48 @@ running = True
 
 pontos = 10
 
-# funcoes
+life = 4
 
-def collisions():
+# funcoes  
+def propCol():
     global pontos
     
     if colPlayer.colliderect(colEnemy) or colEnemy.x <= 10:
         pontos -= 1
         return True
+    
+    else:
+        return False
+
+def lifeNEnemy():
+    global life
+    global pontos
+
+    for i in range(0, life):
+        screen.blit(lifeImg, (50 + i * 30, 50))
+    
+    if life <= 0:
+        gameOver = fontGO.render('GAME OVER', True, (255,0,0))
+        gameOverX = gameOver.get_rect().width
+        gameOverY = gameOver.get_rect().height
+        screen.blit(gameOver, (640 - (gameOverX / 2), 360 - (gameOverY / 2)))
+        return True
+
+    elif pontos <= 0:
+        gameOver = fontGO.render('GAME OVER', True, (255,0,0))
+        gameOverX = gameOver.get_rect().width
+        gameOverY = gameOver.get_rect().height
+        screen.blit(gameOver, (640 - (gameOverX / 2), 360 - (gameOverY / 2)))
+        return True
+
+    elif colPlayer.colliderect(colEnemy):
+        life -= 1
+        return True
+    
     elif colProp.colliderect(colEnemy):
         pontos += 1
         return True
+    
     else:
         return False
 
@@ -115,7 +150,7 @@ def respawnProp():
 
 while running:
     # pygame.time.delay(10)
-    
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -123,7 +158,7 @@ while running:
 # ^^ verificação para fechar a aba caso aperte em fechar ^^
 
     # mostra o background na tela
-    screen.blit(bg, (0,0))
+    screen.blit(bg, (0,0))    
     
     # guarda a informação de qual tecla está sendo pressionada
     keys = pygame.key.get_pressed()
@@ -147,7 +182,7 @@ while running:
             positionPY -= vel
 
             if not triggerProp:
-                posPropY -= 5
+                posPropY -= 1
         
         # se a tecla de setinha pra cima for pressionada
         if keys[pygame.K_DOWN] and positionPY<y - pY:
@@ -156,7 +191,7 @@ while running:
             positionPY += vel    
 
             if not triggerProp:
-                posPropY += 5
+                posPropY += 1
 
         # se a tecla de setinha pra cima for pressionada
         if keys[pygame.K_RIGHT] and positionPX < 100:
@@ -165,7 +200,7 @@ while running:
             positionPX += vel
 
             if not triggerProp:
-                posPropX += 10
+                posPropX += 1
         
         # se a tecla de setinha pra cima for pressionada
         if keys[pygame.K_LEFT] and positionPX > 0:
@@ -174,7 +209,7 @@ while running:
             positionPX -= vel    
 
             if not triggerProp:
-                posPropX -= 10
+                posPropX -= 1
         
         # se a tecla de setinha pra cima for pressionada
         if keys[pygame.K_SPACE]:
@@ -183,14 +218,14 @@ while running:
             triggerProp = True
 
             # velocidade do projetil
-            velProp = 10
+            velProp = 5
 
         
-        if positionEX <= 10 or collisions():
+        if positionEX <= 10 or lifeNEnemy():
             positionEX = respawn()[0]
             positionEY = respawn()[1]
         
-        if posPropX > 1280 or collisions():
+        if posPropX > 1280 or propCol():
             posPropX = respawnProp()[0]
             posPropY = respawnProp()[1]
             triggerProp = respawnProp()[2]
@@ -200,7 +235,7 @@ while running:
         #     running = False
         
         x -= 1
-        positionEX -= 2
+        positionEX -= 1.5
         posPropX += velProp
         
         colPlayer.x = positionPX
@@ -211,10 +246,10 @@ while running:
         
         colEnemy.x = positionEX
         colEnemy.y = positionEY
-        
+
         score = font.render(f' SCORE: {int(pontos)}', True, ('white'))
-        screen.blit(score, (50, 50))
-        
+        screen.blit(score, (1000, 50))
+
         # print(pontos)
         pygame.draw.rect(screen, (255, 0, 0), colPlayer, 3)
         pygame.draw.rect(screen, (255, 0, 0), colProp, 3)

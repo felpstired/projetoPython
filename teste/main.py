@@ -93,3 +93,13 @@ while running:
     # rect = pygame.draw.rect(screen, (255, 0, 255), ((middleX - (rectX / 2)), (rectY + 40), rectX, rectY))
     
     pygame.display.update()
+
+
+
+    elif lifeB == 0 and life > 0:
+        gameWin = fontGO.render('CONGRATULATIONS!!', True, (0,255,0))
+        gameWinX = 640 - ((gameWin.get_rect().width) / 2)
+        gameWinY = 360 - ((gameWin.get_rect().height) / 2)
+        screen.blit(gameWin, (gameWinX, gameWinY))
+        respawnPlayer(gameWinY)
+        return True

@@ -23,6 +23,7 @@ pygame.display.set_icon(iconJanela)
 # font = pygame.font.SysFont('impact', 30)
 font = pygame.font.Font('./fonts/minecrafter.reg.TTF', 30)
 fontGO = pygame.font.Font('./fonts/minecrafter.reg.TTF', 80)
+fontB = pygame.font.Font('./fonts/minecrafter.reg.TTF', 60)
 
 # pegar uma imagem e deixar ela do tamanho da janela
 bgImg = pygame.image.load('./img/fundo.PNG').convert_alpha()
@@ -30,7 +31,7 @@ bg = pygame.transform.scale(bgImg, (x,y))
 
 # pegar uma imagem e deixar ela menor pra ser usada como personagem
 pImg = pygame.image.load('./img/player.png').convert_alpha()
-p = pygame.transform.scale(pImg, (120,120))
+p = pygame.transform.scale(pImg, (140,140))
 p = pygame.transform.flip(p, True, False)
 
 # 
@@ -40,6 +41,10 @@ prop = pygame.transform.scale(propImg, (65, 65))
 # 
 enemyImg = pygame.image.load('./img/inimigo.PNG').convert_alpha()
 enemy = pygame.transform.scale(enemyImg, (100, 100))
+
+# 
+bossImg = pygame.image.load('./img/boss.PNG').convert_alpha()
+boss = pygame.transform.scale(bossImg, (400, 630))
 
 # 
 lifeImg = pygame.image.load('./img/life.PNG').convert_alpha()
@@ -68,11 +73,18 @@ eY = enemy.get_rect().height
 positionEY = (y / 2) - (eY / 2)
 positionEX = (x - 100) - (eX / 2)
 
+# tamanho do boss e a posição dele
+bX = enemy.get_rect().width
+bY = enemy.get_rect().height
+posBY = 45
+posBX = 900
+
 
 # quadrados das colisões
 colPlayer = p.get_rect()
 colProp = prop.get_rect()
 colEnemy = enemy.get_rect()
+colBoss = boss.get_rect()
 
 # s = pygame.Surface((1000,750))  # the size of your rect
 # s.set_alpha(128)                # alpha level
@@ -86,53 +98,15 @@ triggerProp = False
 
 running = True
 
-pontos = 10
+pontos = 0
 
-life = 4
+life = 3
 
-# funcoes  
-def propCol():
-    global pontos
-    
-    if colPlayer.colliderect(colEnemy) or colEnemy.x <= 10:
-        pontos -= 1
-        return True
-    
-    else:
-        return False
+lifeB = 100
 
-def lifeNEnemy():
-    global life
-    global pontos
+respawnP = False
 
-    for i in range(0, life):
-        screen.blit(lifeImg, (50 + i * 30, 50))
-    
-    if life <= 0:
-        gameOver = fontGO.render('GAME OVER', True, (255,0,0))
-        gameOverX = gameOver.get_rect().width
-        gameOverY = gameOver.get_rect().height
-        screen.blit(gameOver, (640 - (gameOverX / 2), 360 - (gameOverY / 2)))
-        return True
-
-    elif pontos <= 0:
-        gameOver = fontGO.render('GAME OVER', True, (255,0,0))
-        gameOverX = gameOver.get_rect().width
-        gameOverY = gameOver.get_rect().height
-        screen.blit(gameOver, (640 - (gameOverX / 2), 360 - (gameOverY / 2)))
-        return True
-
-    elif colPlayer.colliderect(colEnemy):
-        life -= 1
-        return True
-    
-    elif colProp.colliderect(colEnemy):
-        pontos += 1
-        return True
-    
-    else:
-        return False
-
+# funcoes
 def respawn():
     x = 1300
     y = random.randint(1, 640)
@@ -143,7 +117,113 @@ def respawnProp():
     respawnPropX = positionPX
     respawnPropY = positionPY
     velPropX = 0
-    return [(respawnPropX + 30), (respawnPropY + 30), triggerProp, velPropX]
+    return [(respawnPropX + 35), (respawnPropY + 40), triggerProp, velPropX]
+
+def respawnPlayer(textY):
+
+    gameRespawn = font.render('Aperte ENTER para reiniciar', True, ('white'))
+    gameRespawnX = gameRespawn.get_rect().width
+    screen.blit(gameRespawn, (640 - (gameRespawnX / 2), textY + 20))
+
+    return True
+    
+
+def propCol():
+    global life
+    global pontos
+    global lifeB
+    global positionEX
+    global positionEY
+    global posPropX
+    global posPropY
+    global triggerProp
+    global velProp
+    
+    if life > 0:
+
+        if colProp.x == 1300:
+            posPropX = respawnProp()[0]
+            posPropY = respawnProp()[1]
+            triggerProp = respawnProp()[2]
+            velProp = respawnProp()[3]
+            return True
+
+        if colProp.colliderect(colEnemy):
+            positionEX = respawn()[0]
+            positionEY = respawn()[1]
+
+            pontos += 1
+            return True
+        
+        if pontos >= 10:
+
+            if colProp.colliderect(colBoss):
+                posPropX = respawnProp()[0]
+                posPropY = respawnProp()[1]
+                triggerProp = respawnProp()[2]
+                velProp = respawnProp()[3]
+
+                pontos += 10
+                lifeB -= 5
+                return True
+            
+            
+    
+    else:
+        return False
+
+def enemyCol():
+    global life
+    global pontos
+
+    if colEnemy.x <= 10:
+        pontos -= 1
+        return True
+
+    elif colPlayer.colliderect(colEnemy):
+        life -= 1
+        return True
+    
+    else:
+        return False
+
+def lifesCount():
+    global life
+    global pontos
+    global respawnP
+
+    for i in range(0, life):
+        screen.blit(lifeImg, (50 + i * 30, 50))
+    
+    if life <= 0:
+        gameOver = fontGO.render('GAME OVER', True, (255,0,0))
+        gameOverX = 640 - ((gameOver.get_rect().width) / 2)
+        gameOverY = 360 - ((gameOver.get_rect().height) / 2)
+        screen.blit(gameOver, (gameOverX, gameOverY))
+        respawnPlayer(gameOverY + gameOver.get_rect().height)
+        respawnP = True
+        return True
+
+    elif pontos < 0:
+        gameOver = fontGO.render('GAME OVER', True, (255,0,0))
+        gameOverX = 640 - ((gameOver.get_rect().width) / 2)
+        gameOverY = 360 - ((gameOver.get_rect().height) / 2)
+        screen.blit(gameOver, (gameOverX, gameOverY))
+        respawnPlayer(gameOverY + gameOver.get_rect().height)
+        respawnP = True
+        return True
+    
+    elif lifeB == 0 and life > 0:
+        gameWin = fontGO.render('CONGRATULATIONS', True, (0,255,0))
+        gameWinX = 640 - ((gameWin.get_rect().width) / 2)
+        gameWinY = 360 - ((gameWin.get_rect().height) / 2)
+        screen.blit(gameWin, (gameWinX, gameWinY))
+        respawnPlayer(gameWinY + gameWin.get_rect().height)
+        respawnP = True
+        return True
+    
+    else:
+        return False
 
 
 # enquanto o jogo estiver aberto, roda o código abaixo
@@ -220,8 +300,9 @@ while running:
             # velocidade do projetil
             velProp = 5
 
-        
-        if positionEX <= 10 or lifeNEnemy():
+    if life > 0:
+
+        if positionEX <= 10 or enemyCol():
             positionEX = respawn()[0]
             positionEY = respawn()[1]
         
@@ -231,35 +312,71 @@ while running:
             triggerProp = respawnProp()[2]
             velProp = respawnProp()[3]
 
-        # if pontos == 0:
-        #     running = False
-        
-        x -= 1
+    
+
+    # if pontos == 0:
+    #     running = False
+    
+    x -= 1
+
+    if pontos < 10 and life > 0:
         positionEX -= 1.5
-        posPropX += velProp
-        
-        colPlayer.x = positionPX
-        colPlayer.y = positionPY
-        
-        colProp.x = posPropX
-        colProp.y = posPropY
-        
-        colEnemy.x = positionEX
-        colEnemy.y = positionEY
+    else:
+        positionEX -= 3
+    
+    posPropX += velProp
+    
 
-        score = font.render(f' SCORE: {int(pontos)}', True, ('white'))
-        screen.blit(score, (1000, 50))
+    # fazer a colisão seguir as imagens
+    colPlayer.x = positionPX
+    colPlayer.y = positionPY
+    
+    colProp.x = posPropX
+    colProp.y = posPropY
+    
+    colEnemy.x = positionEX
+    colEnemy.y = positionEY
 
-        # print(pontos)
-        pygame.draw.rect(screen, (255, 0, 0), colPlayer, 3)
-        pygame.draw.rect(screen, (255, 0, 0), colProp, 3)
-        pygame.draw.rect(screen, (255, 0, 0), colEnemy, 3)
-        
+    colBoss.x = posBX + 70
+    colBoss.y = posBY
 
-        screen.blit(prop, (posPropX, posPropY))
-        screen.blit(p, (positionPX,positionPY))        
-        screen.blit(enemy, (positionEX,positionEY))
 
+    # print(pontos)
+    # print(colEnemy.x)
+
+    pygame.draw.rect(screen, (255, 0, 0), colPlayer, 3)
+    pygame.draw.rect(screen, (255, 0, 0), colProp, 3)
+    pygame.draw.rect(screen, (255, 0, 0), colEnemy, 3)
+
+    screen.blit(prop, (posPropX, posPropY))
+    screen.blit(p, (positionPX,positionPY))
+    screen.blit(enemy, (positionEX,positionEY))
+
+
+    if pontos >= 10:
+        pygame.draw.rect(screen, (255, 0, 0), colBoss, 3)
+        screen.blit(boss, (posBX,posBY))
+        lifeBTela = fontB.render(f' BOSS: {int(lifeB)}%', True, (255,0,0))
+        lifeBTelaX = lifeBTela.get_rect().width
+        screen.blit(lifeBTela, (640 - (lifeBTelaX / 2), 50))
+
+    if lifeB == 0:
+        posBX += 10
+        posBY += 10
+    
+    # if respawnP:
+    #     if keys[pygame.K_RETURN]:
+    #         main()
+    #     elif keys[pygame.K_ESCAPE]: 
+    #         pygame.quit()
+
+    # vida e pontuação
+    lifesCount()
+
+    score = font.render(f' SCORE: {int(pontos)}', True, ('white'))
+    screen.blit(score, (1000, 50))        
+
+    # fazer o jogo se atualizar repetidamente
     pygame.display.update()
 
 pygame.quit()

@@ -3,15 +3,17 @@
 
 import pygame
 import random
+from sys import exit
+
 
 pygame.init()
-
 
 # tamanho da tela
 x = 1280
 y = 720
 
 screen = pygame.display.set_mode((x,y))
+
 
 # definir o nome da janela
 pygame.display.set_caption("Freddy Fazbear's Pizzeria - ATARI")
@@ -20,10 +22,14 @@ pygame.display.set_caption("Freddy Fazbear's Pizzeria - ATARI")
 iconJanela = pygame.image.load('./img/icon.png')
 pygame.display.set_icon(iconJanela)
 
+
 # font = pygame.font.SysFont('impact', 30)
 font = pygame.font.Font('./fonts/minecrafter.reg.TTF', 30)
 fontGO = pygame.font.Font('./fonts/minecrafter.reg.TTF', 80)
 fontB = pygame.font.Font('./fonts/minecrafter.reg.TTF', 60)
+
+
+# IMAGENS
 
 # pegar uma imagem e deixar ela do tamanho da janela
 bgImg = pygame.image.load('./img/fundo.PNG').convert_alpha()
@@ -53,6 +59,9 @@ lifeImg = pygame.transform.scale(lifeImg, (32, 32))
 
 # faz o programa esperar um tempo antes de ser executado
 # pygame.time.wait(50)
+
+
+# POSIÇÕES
 
 # tamanho do player e a posição dele
 pX = p.get_rect().width
@@ -86,42 +95,44 @@ colProp = prop.get_rect()
 colEnemy = enemy.get_rect()
 colBoss = boss.get_rect()
 
-# s = pygame.Surface((1000,750))  # the size of your rect
-# s.set_alpha(128)                # alpha level
-# s.fill((255,255,255))           # this fills the entire surface
-# # screen.blit(s, (0,0)) 
+
+# VARIAVEIS IMPORTANTES
+
+running = True
 
 # define a velocidade do player
 vel = 1
 
 triggerProp = False
 
-running = True
-
 pontos = 0
 
 life = 3
-
 lifeB = 100
 
 respawnP = False
 
-# funcoes
 def respawn():
+    
     x = 1300
     y = random.randint(1, 640)
+    
     return [x, y]
 
+
 def respawnProp():
+    
     triggerProp = False
     respawnPropX = positionPX
     respawnPropY = positionPY
     velPropX = 0
+    
     return [(respawnPropX + 35), (respawnPropY + 40), triggerProp, velPropX]
+
 
 def respawnPlayer(textY):
 
-    gameRespawn = font.render('Aperte ENTER para reiniciar', True, ('white'))
+    gameRespawn = font.render('Aperte ENTER para reiniciar ou ESC para sair', True, ('white'))
     gameRespawnX = gameRespawn.get_rect().width
     screen.blit(gameRespawn, (640 - (gameRespawnX / 2), textY + 20))
 
@@ -129,6 +140,7 @@ def respawnPlayer(textY):
     
 
 def propCol():
+    
     global life
     global pontos
     global lifeB
@@ -166,28 +178,33 @@ def propCol():
                 pontos += 10
                 lifeB -= 5
                 return True
-            
-            
     
     else:
+        
         return False
 
+
 def enemyCol():
+    
     global life
     global pontos
 
     if colEnemy.x <= 10:
         pontos -= 1
+        
         return True
 
     elif colPlayer.colliderect(colEnemy):
         life -= 1
+        
         return True
     
     else:
+        
         return False
 
 def lifesCount():
+    
     global life
     global pontos
     global respawnP
@@ -202,6 +219,7 @@ def lifesCount():
         screen.blit(gameOver, (gameOverX, gameOverY))
         respawnPlayer(gameOverY + gameOver.get_rect().height)
         respawnP = True
+        
         return True
 
     elif pontos < 0:
@@ -211,6 +229,7 @@ def lifesCount():
         screen.blit(gameOver, (gameOverX, gameOverY))
         respawnPlayer(gameOverY + gameOver.get_rect().height)
         respawnP = True
+        
         return True
     
     elif lifeB == 0 and life > 0:
@@ -220,10 +239,19 @@ def lifesCount():
         screen.blit(gameWin, (gameWinX, gameWinY))
         respawnPlayer(gameWinY + gameWin.get_rect().height)
         respawnP = True
+        
         return True
     
     else:
+        
         return False
+    
+
+def exit_game():
+    
+    running = False
+    pygame.quit()
+    exit()
 
 
 # enquanto o jogo estiver aberto, roda o código abaixo
@@ -313,15 +341,11 @@ while running:
             velProp = respawnProp()[3]
 
     
-
-    # if pontos == 0:
-    #     running = False
-    
     x -= 1
 
     if pontos < 10 and life > 0:
         positionEX -= 1.5
-    else:
+    elif pontos > 10 and life > 0:
         positionEX -= 3
     
     posPropX += velProp
@@ -340,13 +364,11 @@ while running:
     colBoss.x = posBX + 70
     colBoss.y = posBY
 
-
-    # print(pontos)
-    # print(colEnemy.x)
-
+    # DESENHAR AS COLISÕES NA TELA (TESTES)
     pygame.draw.rect(screen, (255, 0, 0), colPlayer, 3)
     pygame.draw.rect(screen, (255, 0, 0), colProp, 3)
     pygame.draw.rect(screen, (255, 0, 0), colEnemy, 3)
+
 
     screen.blit(prop, (posPropX, posPropY))
     screen.blit(p, (positionPX,positionPY))
@@ -359,16 +381,28 @@ while running:
         lifeBTela = fontB.render(f' BOSS: {int(lifeB)}%', True, (255,0,0))
         lifeBTelaX = lifeBTela.get_rect().width
         screen.blit(lifeBTela, (640 - (lifeBTelaX / 2), 50))
+        
 
     if lifeB == 0:
         posBX += 10
         posBY += 10
     
-    # if respawnP:
-    #     if keys[pygame.K_RETURN]:
-    #         main()
-    #     elif keys[pygame.K_ESCAPE]: 
-    #         pygame.quit()
+    
+    if respawnP:
+        
+        if keys[pygame.K_RETURN]:
+            
+            running = True
+            vel = 1
+            triggerProp = False
+            pontos = 0
+            life = 3
+            lifeB = 100
+            respawnP = False
+            
+        elif keys[pygame.K_ESCAPE]: 
+            exit_game()
+
 
     # vida e pontuação
     lifesCount()
@@ -378,9 +412,12 @@ while running:
 
     # fazer o jogo se atualizar repetidamente
     pygame.display.update()
+    
 
-pygame.quit()
+# ONDE SERIA SUPOSTO PARA CHAMAR A MAIN DO PROJETO (MAS NAO APRENDI A DELIMITAR O LOOP AINDA)
 
+# if __name__ == "__main__":
+#     main()
 
 #  >>>> ANOTAÇÕES >>>>
 
@@ -388,8 +425,7 @@ pygame.quit()
 # tem a lista para as teclas numericas
 # https://stackoverflow.com/questions/54249410/num-pad-input-for-pygame
 
-# if keys[pygame.K_RIGHT]:
-#     x -= 10
 
-# if keys[pygame.K_LEFT]: 
-#     x += 2
+# ABENÇOADO SEJA ESSE SITE TAMBÉM
+# tem a estrutura básica de um código em pygame
+# https://stackoverflow.com/questions/1413937/how-is-this-basic-pygame-structure

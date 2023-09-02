@@ -343,14 +343,30 @@ while running:
     
     x -= 1
 
-    if pontos < 10 and life > 0:
-        positionEX -= 1.5
-    elif pontos > 10 and life > 0:
-        positionEX -= 3
+    if life > 0:
+        if pontos < 2:
+            positionEX -= 1
+        elif pontos < 4:
+            positionEX -= 1.5
+        elif pontos < 6:
+            positionEX -= 2
+        elif pontos < 8:
+            positionEX -= 2.5
+        elif pontos < 10:
+            positionEX -= 3
+        elif pontos < 40:
+            positionEX -= 3.5
+        elif pontos < 60:
+            positionEX -= 4
+        elif pontos < 80:
+            positionEX -= 4.5
+        elif pontos < 100:
+            positionEX -= 5
+        else:
+            positionEX -= 5.5
     
     posPropX += velProp
     
-
     # fazer a colisão seguir as imagens
     colPlayer.x = positionPX
     colPlayer.y = positionPY
@@ -365,9 +381,9 @@ while running:
     colBoss.y = posBY
 
     # DESENHAR AS COLISÕES NA TELA (TESTES)
-    pygame.draw.rect(screen, (255, 0, 0), colPlayer, 3)
-    pygame.draw.rect(screen, (255, 0, 0), colProp, 3)
-    pygame.draw.rect(screen, (255, 0, 0), colEnemy, 3)
+    # pygame.draw.rect(screen, (255, 0, 0), colPlayer, 3)
+    # pygame.draw.rect(screen, (255, 0, 0), colProp, 3)
+    # pygame.draw.rect(screen, (255, 0, 0), colEnemy, 3)
 
 
     screen.blit(prop, (posPropX, posPropY))
@@ -376,7 +392,7 @@ while running:
 
 
     if pontos >= 10:
-        pygame.draw.rect(screen, (255, 0, 0), colBoss, 3)
+        # pygame.draw.rect(screen, (255, 0, 0), colBoss, 3)
         screen.blit(boss, (posBX,posBY))
         lifeBTela = fontB.render(f' BOSS: {int(lifeB)}%', True, (255,0,0))
         lifeBTelaX = lifeBTela.get_rect().width
@@ -385,10 +401,11 @@ while running:
 
     if lifeB == 0:
         posBX += 10
-        posBY += 10
     
     
     if respawnP:
+        positionEX = 1300
+        posPropX = 1300
         
         if keys[pygame.K_RETURN]:
             
